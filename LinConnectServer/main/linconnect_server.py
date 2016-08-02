@@ -42,6 +42,9 @@ import pybonjour
 import shutil
 import base64
 
+import yagmail
+import keyring
+
 app_name = 'linconnect-server'
 version = "2.20"
 
@@ -88,6 +91,8 @@ enable_bonjour = 1
 enable_instruction_webpage = 1
 notify_timeout = 5000""")
 
+#yag = yagmail.SMTP('altemail', 'password')
+
 parser = ConfigParser.ConfigParser()
 parser.read(conf_file)
 del conf_file
@@ -133,6 +138,8 @@ class Notification(object):
                 with open(icon_path, 'w') as icon_file:
                     icon_file.write(icon_data)
 
+#            yag.send('email@gmail.com', new_notification_header , new_notification_description)
+            print (new_notification_header + " -- " + new_notification_description)
             # Send the notification
             notif = Notify.Notification.new(_notification_header, _notification_description, icon_path)
             # Add 'value' hint to display nice progress bar if we see percents in the notification
