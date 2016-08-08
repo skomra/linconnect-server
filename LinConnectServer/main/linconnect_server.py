@@ -91,8 +91,6 @@ enable_bonjour = 1
 enable_instruction_webpage = 1
 notify_timeout = 5000""")
 
-#yag = yagmail.SMTP('altemail', 'password')
-
 parser = ConfigParser.ConfigParser()
 parser.read(conf_file)
 del conf_file
@@ -138,7 +136,6 @@ class Notification(object):
                 with open(icon_path, 'w') as icon_file:
                     icon_file.write(icon_data)
 
-#            yag.send('email@gmail.com', new_notification_header , new_notification_description)
             yagmail.SMTP('aaron.skomra').send('skomra@gmail.com', new_notification_header + " " + new_notification_description, new_notification_description)
             print (new_notification_header + " -- " + new_notification_description)
             # Send the notification
