@@ -154,6 +154,7 @@ class Notification(object):
             ts = "https://twitter.com/search?q="
             #tweet = new_notification_description;
             tweet = new_notification_description[:-14]
+            print (tweet)
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)

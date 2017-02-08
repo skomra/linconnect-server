@@ -47,3 +47,18 @@ Client Download
 A binary of the client may be downloaded from the Google Play Store.
 
 https://play.google.com/store/apps/details?id=com.willhauck.linconnectclient
+
+Android Virtual Device
+---------------------
+To send notifications from an Android Virtual Device to your desktop use the cusom IP address 10.0.2.2:9090
+
+Install notes:
+sudo apt-get install python-pip
+pip install cherrypy
+pip install pybonjour
+sudo apt-get install libxcb-screensaver0 libavahi-compat-libdnssd1 libphonon4 libhunspell-dev
+pip install -e git+https://github.com/Eichhoernchen/pybonjour.git#egg=pybonjour
+pip install yagmail
+pip install yagmail (twice)
+pip install keyrings
+pip install keyrings.alt
