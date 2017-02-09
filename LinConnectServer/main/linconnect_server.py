@@ -46,6 +46,7 @@ import yagmail
 import keyring
 import urllib
 
+from send_email import SendEmail
 app_name = 'linconnect-server'
 version = "2.20"
 
@@ -154,11 +155,10 @@ class Notification(object):
             ts = "https://twitter.com/search?q="
             #tweet = new_notification_description;
             tweet = new_notification_description[:-14]
-            print (tweet)
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
-            yagmail.SMTP('aaron.skomra').send('skomra@gmail.com', new_notification_header + " - " + new_notification_description, new_notification_description + "\n" + twitterSearch + "\n" + twitterSearchTwo)
+            SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description + "\n" + twitterSearch + "\n" + twitterSearchTwo)
             print (new_notification_header + " -- " + new_notification_description)
             # Send the notification
             notif = Notify.Notification.new(_notification_header, _notification_description, icon_path)
