@@ -24,26 +24,14 @@ try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
-#import os
-#import sys
-#import signal
-#import select
-#import threading
-import platform
+mport platform
 import re
-#import glob
-#import hashlib
 
 import cherrypy
-#import subprocess
 from gi.repository import Notify
 from gi.repository import GLib
-#import pybonjour
-#import shutil
 import base64
 
-#import yagmail
-#import keyring
 import urllib
 
 from send_email import SendEmail
@@ -54,61 +42,12 @@ version = "2.20"
 _notification_header = ""
 _notification_description = ""
 
-# Configuration
-#script_dir = os.path.abspath(os.path.dirname(__file__))
-
-#def user_specific_location(type, file):
-#    dir = os.path.expanduser(os.path.join('~/.' + type, app_name))
-#    if not os.path.isdir(dir):
-#        os.makedirs(dir)
-#    return os.path.join(dir, file)
-
-#conf_file = user_specific_location('config', 'conf.ini')
-#icon_path_format = user_specific_location('cache', 'icon_cache_%s.png')
-
-# Clear the icon cache
-#for icon_cache_file in glob.glob(icon_path_format % '*'):
-#    os.unlink(icon_cache_file)
-
-#old_conf_file = os.path.join(script_dir, 'conf.ini')
-#if os.path.isfile(old_conf_file):
-#    if os.path.isfile(conf_file):
-#        print("Both old and new config files exist: %s and %s, ignoring old one" % (old_conf_file, conf_file))
-#    else:
-#        print("Old config file %s found, moving to a new location: %s" % (old_conf_file, conf_file))
-#        shutil.move(old_conf_file, conf_file)
-#del old_conf_file
-
-#try:
-#    with open(conf_file):
-#        print("Loading conf.ini")
-#except IOError:
-#    print("Creating conf.ini")
-#    with open(conf_file, 'w') as text_file:
-#        text_file.write("""[connection]
-#port = 9090
-#enable_bonjour = 1
-
-#[other]
-#enable_instruction_webpage = 1
-#notify_timeout = 5000""")
-
 parser = ConfigParser.ConfigParser()
-#parser.read(conf_file)
-#del conf_file
 
 # Must append port because Java Bonjour library can't determine it
 _service_name = platform.node()
 
 class Notification(object):
-    #if parser.getboolean('other', 'enable_instruction_webpage') == 1:
-    #    with open(os.path.join(script_dir, 'index.html'), 'rb') as f:
-    #        _index_source = f.read()
-
-    #def index(self):
-    #    return self._index_source % (version, "<br/>".join(get_local_ip()))
-
-    #index.exposed = True
 
     @staticmethod
     def get_first_n_words(n,s):
@@ -143,38 +82,20 @@ class Notification(object):
             _notification_header = new_notification_header
             _notification_description = new_notification_description
 
-            # Icon should be small enough to fit into modern PCs RAM.
-            # Alternatively, can do this in chunks, twice: first to count MD5, second to copy the file.
-            #icon_data = notificon.file.read()
-            #icon_path = icon_path_format % hashlib.md5(icon_data).hexdigest()
-
-            #if not os.path.isfile(icon_path):
-            #    with open(icon_path, 'w') as icon_file:
-            #        icon_file.write(icon_data)
-
             ts = "https://twitter.com/search?q="
-            #tweet = new_notification_description;
+
             tweet = new_notification_description[:-14]
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
             SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description + "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
             print (new_notification_header + " -- " + new_notification_description)
-            # Send the notification
-            #notif = Notify.Notification.new(_notification_header, _notification_description, icon_path)
-            # Add 'value' hint to display nice progress bar if we see percents in the notification
+
             percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
             if percent_match:
                 notif.set_hint('value', GLib.Variant('i', int(percent_match.group(1))))
             if parser.has_option('other', 'notify_timeout'):
                 notif.set_timeout(parser.getint('other', 'notify_timeout'))
-            #try:
-            #    notif.show()
-            #except:
-                # Workaround for org.freedesktop.DBus.Error.ServiceUnknown
-            #    Notify.uninit()
-            #    Notify.init("com.willhauck.linconnect")
-            #    notif.show()
 
         return "true"
     notif.exposed = True
