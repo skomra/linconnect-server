@@ -24,7 +24,7 @@ try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
-mport platform
+import platform
 import re
 
 import cherrypy
@@ -63,6 +63,11 @@ class Notification(object):
                 n += 1
         return ret
 
+    @staticmethod
+    def filter_tweet(tweet):
+	
+        return 0
+
     def notif(self, notificon):
         global _notification_header
         global _notification_description
@@ -88,7 +93,10 @@ class Notification(object):
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
-            SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description + "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
+
+            if (not self.filter_tweet(tweet)):
+                SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description +
+                "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
             print (new_notification_header + " -- " + new_notification_description)
 
             percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
