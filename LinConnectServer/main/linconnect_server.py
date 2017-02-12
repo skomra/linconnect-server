@@ -46,6 +46,7 @@ import yagmail
 import keyring
 import urllib
 
+from notification import Notification
 from send_email import SendEmail
 app_name = 'linconnect-server'
 version = "2.20"
@@ -99,86 +100,6 @@ del conf_file
 
 # Must append port because Java Bonjour library can't determine it
 _service_name = platform.node()
-
-class Notification(object):
-    if parser.getboolean('other', 'enable_instruction_webpage') == 1:
-        with open(os.path.join(script_dir, 'index.html'), 'rb') as f:
-            _index_source = f.read()
-
-        def index(self):
-            return self._index_source % (version, "<br/>".join(get_local_ip()))
-
-        index.exposed = True
-
-    @staticmethod
-    def get_first_n_words(n,s):
-        ret = ""
-	splitted = s.split()
-        for x in range(0,n):
-            if x >= len(splitted):
-                return ret
-            if not splitted[x].startswith( 'RT' ):
-	        ret = ret + splitted[x] + " "
-            else:
-                print ("removing "+ splitted[x])
-                n += 1
-        return ret
-
-    def notif(self, notificon):
-        global _notification_header
-        global _notification_description
-
-        # Get notification data from HTTP header
-        try:
-            new_notification_header = base64.urlsafe_b64decode(cherrypy.request.headers['NOTIFHEADER'])
-            new_notification_description = base64.urlsafe_b64decode(cherrypy.request.headers['NOTIFDESCRIPTION'])
-        except:
-            # Maintain compatibility with old application
-            new_notification_header = cherrypy.request.headers['NOTIFHEADER'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
-            new_notification_description = cherrypy.request.headers['NOTIFDESCRIPTION'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
-
-        # Ensure the notification is not a duplicate
-        if (_notification_header != new_notification_header) \
-        or (_notification_description != new_notification_description):
-            _notification_header = new_notification_header
-            _notification_description = new_notification_description
-
-            # Icon should be small enough to fit into modern PCs RAM.
-            # Alternatively, can do this in chunks, twice: first to count MD5, second to copy the file.
-            icon_data = notificon.file.read()
-            icon_path = icon_path_format % hashlib.md5(icon_data).hexdigest()
-
-            if not os.path.isfile(icon_path):
-                with open(icon_path, 'w') as icon_file:
-                    icon_file.write(icon_data)
-
-            ts = "https://twitter.com/search?q="
-            #tweet = new_notification_description;
-            tweet = new_notification_description[:-14]
-            twitterSearch = ts + urllib.quote(tweet)
-            sixWords = self.get_first_n_words(7,tweet)
-            twitterSearchTwo = ts + urllib.quote(sixWords)
-            SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description + "\n" + twitterSearch + "\n" + twitterSearchTwo)
-            print (new_notification_header + " -- " + new_notification_description)
-            # Send the notification
-            notif = Notify.Notification.new(_notification_header, _notification_description, icon_path)
-            # Add 'value' hint to display nice progress bar if we see percents in the notification
-            percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
-            if percent_match:
-                notif.set_hint('value', GLib.Variant('i', int(percent_match.group(1))))
-            if parser.has_option('other', 'notify_timeout'):
-                notif.set_timeout(parser.getint('other', 'notify_timeout'))
-            try:
-                notif.show()
-            except:
-                # Workaround for org.freedesktop.DBus.Error.ServiceUnknown
-                Notify.uninit()
-                Notify.init("com.willhauck.linconnect")
-                notif.show()
-
-        return "true"
-    notif.exposed = True
-
 
 def register_callback(sdRef, flags, errorCode, name, regtype, domain):
     if errorCode == pybonjour.kDNSServiceErr_NoError:
