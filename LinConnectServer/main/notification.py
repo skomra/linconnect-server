@@ -65,7 +65,10 @@ class Notification(object):
 
     @staticmethod
     def filter_tweet(tweet):
-	
+        tweet = tweet.lower()
+        if "nodapl" in tweet:
+            print ("tweet filtered: " + tweet)
+            return 1
         return 0
 
     def notif(self, notificon):
@@ -95,15 +98,17 @@ class Notification(object):
             twitterSearchTwo = ts + urllib.quote(sixWords)
 
             if (not self.filter_tweet(tweet)):
-                SendEmail.send(new_notification_header + " - " + new_notification_description, new_notification_description +
+                SendEmail.send(new_notification_header + " - " +
+                new_notification_description, new_notification_description +
                 "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
+
             print (new_notification_header + " -- " + new_notification_description)
 
-            percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
-            if percent_match:
-                notif.set_hint('value', GLib.Variant('i', int(percent_match.group(1))))
-            if parser.has_option('other', 'notify_timeout'):
-                notif.set_timeout(parser.getint('other', 'notify_timeout'))
+            #percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
+            #if percent_match:
+            #    notif.set_hint('value', GLib.Variant('i', int(percent_match.group(1))))
+            #if parser.has_option('other', 'notify_timeout'):
+            #    notif.set_timeout(parser.getint('other', 'notify_timeout'))
 
         return "true"
     notif.exposed = True
