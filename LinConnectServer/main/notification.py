@@ -35,6 +35,8 @@ import base64
 import urllib
 
 from send_email import SendEmail
+import datetime
+
 app_name = 'linconnect-server'
 version = "2.20"
 
@@ -66,8 +68,9 @@ class Notification(object):
     @staticmethod
     def filter_tweet(tweet):
         tweet = tweet.lower()
+        now = datetime.datetime.now()
         if "nodapl" in tweet:
-            print ("tweet filtered: " + tweet)
+            print (now.strftime("%Y-%m-%d %H:%M") + " FILTERED: " + tweet)
             return 1
         return 0
 
@@ -97,12 +100,12 @@ class Notification(object):
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
 
+            now = datetime.datetime.now()
             if (not self.filter_tweet(tweet)):
                 SendEmail.send(new_notification_header + " - " +
                 new_notification_description, new_notification_description +
                 "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
-
-            print (new_notification_header + " -- " + new_notification_description)
+                print (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header + " -- " + new_notification_description)
 
             #percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
             #if percent_match:
