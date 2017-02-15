@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 '''
     LinConnect: Mirror Android notifications on Linux Desktop
 
@@ -61,7 +63,7 @@ class Notification(object):
             if not splitted[x].startswith( 'RT' ):
 	        ret = ret + splitted[x] + " "
             else:
-                print ("removing "+ splitted[x])
+                #print ("removing "+ splitted[x])
                 n += 1
         return ret
 
@@ -73,6 +75,15 @@ class Notification(object):
             print (now.strftime("%Y-%m-%d %H:%M") + " FILTERED: " + tweet)
             return 1
         return 0
+
+    @staticmethod
+    def clean_tweet(tweet):
+	splitted = tweet.split()
+        for x in range(0,len(splitted)):
+            if splitted[x].decode('utf-8').endswith(u"\u2026"):
+                splitted.remove(splitted[x])
+        tweet = " ".join(splitted)
+        return tweet
 
     def notif(self, notificon):
         global _notification_header
@@ -96,6 +107,7 @@ class Notification(object):
             ts = "https://twitter.com/search?q="
 
             tweet = new_notification_description[:-14]
+            tweet = self.clean_tweet(tweet)
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
@@ -103,15 +115,10 @@ class Notification(object):
             now = datetime.datetime.now()
             if (not self.filter_tweet(tweet)):
                 SendEmail.send(new_notification_header + " - " +
-                new_notification_description, new_notification_description +
-                "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
-                print (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header + " -- " + new_notification_description)
-
-            #percent_match = re.search(r'(1?\d{2})%', _notification_header + _notification_description)
-            #if percent_match:
-            #    notif.set_hint('value', GLib.Variant('i', int(percent_match.group(1))))
-            #if parser.has_option('other', 'notify_timeout'):
-            #    notif.set_timeout(parser.getint('other', 'notify_timeout'))
+                               new_notification_description, new_notification_description +
+                               "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
+                print (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header +
+                       " -- " + new_notification_description)
 
         return "true"
     notif.exposed = True
