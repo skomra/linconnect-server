@@ -82,6 +82,7 @@ class Notification(object):
         for x in range(0,len(splitted)):
             if splitted[x].decode('utf-8').endswith(u"\u2026"):
                 splitted.remove(splitted[x])
+                break
         tweet = " ".join(splitted)
         return tweet
 
@@ -97,6 +98,7 @@ class Notification(object):
             # Maintain compatibility with old application
             new_notification_header = cherrypy.request.headers['NOTIFHEADER'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
             new_notification_description = cherrypy.request.headers['NOTIFDESCRIPTION'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
+            new_notification_description = new_notification_description[:-14] #remove (via twitter)
 
         # Ensure the notification is not a duplicate
         if (_notification_header != new_notification_header) \
@@ -106,8 +108,7 @@ class Notification(object):
 
             ts = "https://twitter.com/search?q="
 
-            tweet = new_notification_description[:-14]
-            tweet = self.clean_tweet(tweet)
+            tweet = self.clean_tweet(new_notification_description)
             twitterSearch = ts + urllib.quote(tweet)
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
@@ -117,8 +118,9 @@ class Notification(object):
                 SendEmail.send(new_notification_header + " - " +
                                new_notification_description, new_notification_description +
                                "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
-                print (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header +
-                       " -- " + new_notification_description)
+                logmessage = (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header +
+                              " -- " + new_notification_description)
+                print (logmessage[:98].replace('\n', ' '))
 
         return "true"
     notif.exposed = True
