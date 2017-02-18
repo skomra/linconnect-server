@@ -38,6 +38,7 @@ import urllib
 
 from send_email import SendEmail
 import datetime
+import commands
 
 app_name = 'linconnect-server'
 version = "2.20"
@@ -86,6 +87,27 @@ class Notification(object):
         tweet = " ".join(splitted)
         return tweet
 
+    @staticmethod
+    def findUrl(description):
+        url = 0;
+        splitted = description.split()
+        for x in range(0, len(splitted)):
+            if splitted[x].startswith("tinyurl.com"):
+                url = splitted[x]
+        return url
+
+    @staticmethod
+    def add_description(header, description):
+        output = ""
+        if (header is "Rotoworld Baseball"):
+            url = findUrl(description)
+            if (url):
+                command = ("lynx -dump " + url + " | tail -n +540 | head -n 25")
+                output = commands.getstatusoutput(command)
+                print (output)
+        output = "\n added \n" + output
+        return output
+
     def notif(self, notificon):
         global _notification_header
         global _notification_description
@@ -98,13 +120,14 @@ class Notification(object):
             # Maintain compatibility with old application
             new_notification_header = cherrypy.request.headers['NOTIFHEADER'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
             new_notification_description = cherrypy.request.headers['NOTIFDESCRIPTION'].replace('\x00', '').decode('iso-8859-1', 'replace').encode('utf-8')
-            new_notification_description = new_notification_description[:-14] #remove (via twitter)
 
         # Ensure the notification is not a duplicate
         if (_notification_header != new_notification_header) \
         or (_notification_description != new_notification_description):
             _notification_header = new_notification_header
             _notification_description = new_notification_description
+
+            new_notification_description = new_notification_description[:-14] #remove (via twitter)
 
             ts = "https://twitter.com/search?q="
 
@@ -113,13 +136,15 @@ class Notification(object):
             sixWords = self.get_first_n_words(7,tweet)
             twitterSearchTwo = ts + urllib.quote(sixWords)
 
+            bonus = self.add_description(new_notification_header, new_notification_description)
             now = datetime.datetime.now()
             if (not self.filter_tweet(tweet)):
                 SendEmail.send(new_notification_header + " - " +
                                new_notification_description, new_notification_description +
-                               "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo)
+                               "\n\n" + twitterSearch + "\n\n" + twitterSearchTwo +
+                               "\n\n" + bonus)
                 logmessage = (now.strftime("%Y-%m-%d %H:%M") + " " + new_notification_header +
-                              " -- " + new_notification_description)
+                              " - " + new_notification_description)
                 print (logmessage[:98].replace('\n', ' '))
 
         return "true"
