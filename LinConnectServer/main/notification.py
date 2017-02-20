@@ -99,12 +99,13 @@ class Notification(object):
     @staticmethod
     def add_description(header, description):
         output = ""
-        if (header is "Rotoworld Baseball"):
-            url = findUrl(description)
+        if (header == "Rotoworld Baseball"):
+            print ("Rotoworld Baseball")
+            url = Notification.findUrl(description)
+            print ("url " + url)
             if (url):
-                command = ("lynx -dump " + url + " | tail -n +540 | head -n 25")
-                output = commands.getstatusoutput(command)
-                print (output)
+                command = ("lynx -dump " + url + " | tail -n +540 2>/dev/null | head -n 25")
+                output = commands.getoutput(command)
         output = "\n added \n" + output
         return output
 
