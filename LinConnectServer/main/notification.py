@@ -100,9 +100,7 @@ class Notification(object):
     def add_description(header, description):
         output = ""
         if (header == "Rotoworld Baseball"):
-            print ("Rotoworld Baseball")
             url = Notification.findUrl(description)
-            print ("url " + url)
             if (url):
                 command = ("lynx -dump " + url + " | tail -n +540 2>/dev/null | head -n 25")
                 output = commands.getoutput(command)
