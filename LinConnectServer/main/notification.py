@@ -61,11 +61,7 @@ class Notification(object):
         for x in range(0,n):
             if x >= len(splitted):
                 return ret
-            if not splitted[x].startswith( 'RT' ):
-	        ret = ret + splitted[x] + " "
-            else:
-                #print ("removing "+ splitted[x])
-                n += 1
+	    ret = ret + splitted[x] + " "
         return ret
 
     @staticmethod
@@ -77,6 +73,26 @@ class Notification(object):
             return 1
         return 0
 
+    #TODO only removes first instance
+    @staticmethod
+    def remove_word_by_prefix(prefix, splitted):
+            #if not splitted[x].startswith( 'RT' ):
+            #else:
+                #print ("removing "+ splitted[x])
+            #    n += 1
+        for x in range(0, len(splitted)):
+            if splitted[x] == prefix:
+                splitted.remove(splitted[x])
+                break
+        return splitted
+
+    @staticmethod
+    def remove_prefix(prefix, splitted):
+        for x in range(0, len(splitted)):
+            if splitted[x].startswith("@"):
+                splitted[x] = splitted[x][len(prefix):]
+        return splitted
+
     @staticmethod
     def clean_tweet(tweet):
 	splitted = tweet.split()
@@ -84,13 +100,10 @@ class Notification(object):
             if splitted[x].decode('utf-8').endswith(u"\u2026"):
                 splitted.remove(splitted[x])
                 break
-        for x in range(0, len(splitted)):
-            if splitted[x] == ('RT'):
-                splitted.remove(splitted[x])
-                break
-        for x in range(0, len(splitted)):
-            if splitted[x].startswith("@"):
-                print(splitted[x])
+        splitted = Notification.remove_word_by_prefix('RT', splitted)
+        splitted = Notification.remove_word_by_prefix("http", splitted)
+        splitted = Notification.remove_prefix("@", splitted)
+        splitted = Notification.remove_prefix(".@", splitted)
         tweet = " ".join(splitted)
         return tweet
 
