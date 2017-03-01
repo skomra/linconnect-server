@@ -84,6 +84,13 @@ class Notification(object):
             if splitted[x].decode('utf-8').endswith(u"\u2026"):
                 splitted.remove(splitted[x])
                 break
+        for x in range(0, len(splitted)):
+            if splitted[x] == ('RT'):
+                splitted.remove(splitted[x])
+                break
+        for x in range(0, len(splitted)):
+            if splitted[x].startswith("@"):
+                print(splitted[x])
         tweet = " ".join(splitted)
         return tweet
 
